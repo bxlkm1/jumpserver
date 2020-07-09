@@ -22,9 +22,8 @@ class RequestAssetPermTicketSerializer(serializers.ModelSerializer):
                                              source='meta.confirmed_assets',
                                              default=list, required=False,
                                              label=_('Confirmed assets'))
-    confirmed_system_user = serializers.ListField(child=serializers.UUIDField(),
-                                                  source='meta.confirmed_system_user',
-                                                  default=list, required=False,
+    confirmed_system_user = serializers.UUIDField(source='meta.confirmed_system_user',
+                                                  default='', required=False,
                                                   label=_('Confirmed system user'))
     assets_waitlist_url = serializers.SerializerMethodField()
     system_user_waitlist_url = serializers.SerializerMethodField()
@@ -106,6 +105,17 @@ class RequestAssetPermTicketSerializer(serializers.ModelSerializer):
         date_expired = meta.get('date_expired')
         if date_expired:
             meta['date_expired'] = date_expired.strftime('%Y-%m-%d %H:%M:%S%z')
+
+        confirmed_system_user = meta.get('confirmed_system_user')
+        if confirmed_system_user:
+            meta['confirmed_system_user'] = str(confirmed_system_user)
+
+        confirmed_assets = meta.get('confirmed_assets')
+        if confirmed_assets:
+            new_confirmed_assets = []
+            for asset in confirmed_assets:
+                new_confirmed_assets.append(str(asset))
+            meta['confirmed_assets'] = new_confirmed_assets
         return super().save(**kwargs)
 
     def update(self, instance, validated_data):
